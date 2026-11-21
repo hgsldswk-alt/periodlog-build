@@ -1,0 +1,144 @@
+name: PeriodLog
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: zh-Hans
+  knownRegions: [zh-Hans, en, zh-Hant]
+settings:
+  base:
+    APP_ID: com.hgsldswk.periodlog
+    APP_STORE_ID: "6835123587"
+    MARKETING_VERSION: "1.0.1"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  PeriodLog:
+    type: application
+    platform: iOS
+    sources:
+      - PeriodLog
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_ID)
+        TARGETED_DEVICE_FAMILY: "1"  # XcodeGen 默认 1,2 会盖掉项目级设置，必须写在 target 上
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: NeutralIcon
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
+      configs:
+        Release:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: Apple Distribution
+          PROVISIONING_PROFILE_SPECIFIER: PeriodLog AppStore
+    info:
+      path: PeriodLog/Info.plist
+      properties:
+        CFBundleDisplayName: 经期记录
+        CFBundleDevelopmentRegion: zh-Hans
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.hgsldswk.periodlog.backup
+            UTTypeDescription: PeriodLog Backup
+            UTTypeConformsTo: [public.json]
+            UTTypeTagSpecification:
+              public.filename-extension: [periodbackup]
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: PeriodLog Backup
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.hgsldswk.periodlog.backup]
+        CFBundleURLTypes:
+          - CFBundleURLName: $(APP_ID)
+            CFBundleURLSchemes: [periodlog]
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        ITSAppUsesNonExemptEncryption: false
+        PeriodLogAppGroup: group.$(APP_ID)
+        PeriodLogProProductID: $(APP_ID).pro
+        PeriodLogTrialProductID: $(APP_ID).trial
+        APP_STORE_ID: $(APP_STORE_ID)
+        NSHealthShareUsageDescription: 经你允许，读取苹果健康中的经期、体温与相关记录，导入到本机。
+        NSHealthUpdateUsageDescription: 经你允许，把你在本 App 记录的经期、体温与相关记录保存到苹果健康。
+        NSFaceIDUsageDescription: 解锁并保护你的本地经期记录。
+    entitlements:
+      path: PeriodLog/PeriodLog.entitlements
+      properties:
+        com.apple.security.application-groups: [group.$(APP_ID)]
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)$(CFBundleIdentifier)
+    dependencies:
+      - target: PeriodLogWidget
+  PeriodLogWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - PeriodLogWidget
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_ID).widget
+        TARGETED_DEVICE_FAMILY: "1"  # XcodeGen 默认 1,2 会盖掉项目级设置，必须写在 target 上
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+      configs:
+        Release:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: Apple Distribution
+          PROVISIONING_PROFILE_SPECIFIER: PeriodLog Widget AppStore
+    info:
+      path: PeriodLogWidget/Info.plist
+      properties:
+        CFBundleDisplayName: 经期记录
+        CFBundleDevelopmentRegion: zh-Hans
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        PeriodLogAppGroup: group.$(APP_ID)
+    entitlements:
+      path: PeriodLogWidget/PeriodLogWidget.entitlements
+      properties:
+        com.apple.security.application-groups: [group.$(APP_ID)]
+  PeriodLogTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - PeriodLogTests
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_ID).tests
+        GENERATE_INFOPLIST_FILE: YES
+  PeriodLogUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - PeriodLogUITests
+    dependencies:
+      - target: PeriodLog
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_ID).uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: PeriodLog
+schemes:
+  PeriodLog:
+    build:
+      targets:
+        PeriodLog: all
+        PeriodLogTests: [test]
+    test:
+      config: Debug
+      targets: [PeriodLogTests]
+  PeriodLogUI:
+    build:
+      targets:
+        PeriodLog: all
+        PeriodLogUITests: [test]
+    test:
+      config: Debug
+      targets: [PeriodLogUITests]
