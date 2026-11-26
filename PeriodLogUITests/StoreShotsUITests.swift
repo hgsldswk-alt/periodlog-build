@@ -1,0 +1,38 @@
+import XCTest
+
+final class StoreShotsUITests: XCTestCase {
+    override func setUp() { continueAfterFailure = true; executionTimeAllowance = 1200 }
+
+    private let languages: [(code: String, locale: String)] = [("zh-Hans", "zh_CN"), ("en", "en_US"), ("zh-Hant", "zh_TW"), ("ja", "ja_JP")]
+    private let pages: [(name: String, args: [String])] = [
+        ("1-today", []),
+        ("2-calendar", ["-calendar"]),
+        ("3-share-friend", ["-share-friend"]),
+        ("4-stats", ["-stats"]),
+        ("5-friends", ["-friends"]),
+        ("6-paywall", ["-paywall"])
+    ]
+
+    func testStoreScreenshots() throws {
+        for language in languages {
+            for page in pages {
+                let app = XCUIApplication()
+                app.launchArguments = ["-demo", "-hide-paste-hint", "-AppleLanguages", "(" + language.code + ")", "-AppleLocale", language.locale] + page.args
+                app.launch()
+                _ = app.wait(for: .runningForeground, timeout: 10)
+                Thread.sleep(forTimeInterval: 2.5)
+                try save(app.screenshot(), name: "store-" + language.code + "-" + page.name)
+                app.terminate()
+            }
+        }
+    }
+
+    private func save(_ screenshot: XCUIScreenshot, name: String) throws {
+        let attachment = XCTAttachment(screenshot: screenshot); attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
+        if let path = ProcessInfo.processInfo.environment["SHOTS_DIR"] ?? ProcessInfo.processInfo.environment["TEST_RUNNER_SHOTS_DIR"] {
+            let directory = URL(fileURLWithPath: path, isDirectory: true)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try screenshot.pngRepresentation.write(to: directory.appendingPathComponent(name + ".png"))
+        }
+    }
+}
